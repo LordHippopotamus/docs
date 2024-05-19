@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>getting_started</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li><a href="#требования">Требования</a>
+<ul>
+<li><a href="#про-формы">Про формы</a></li>
+</ul>
+</li>
+<li><a href="#работа-с-бд">Работа с бд</a>
+<ul>
+<li><a href="#подключение-к-бд">Подключение к бд</a></li>
+<li><a href="#запросы-к-бд">Запросы к бд</a></li>
+<li><a href="#вывод-данных-из-бд">Вывод данных из бд</a></li>
+<li><a href="#добавление-записи-в-бд">Добавление записи в бд</a></li>
+<li><a href="#редактирование-записи">Редактирование записи</a></li>
+<li><a href="#удаление-записи">Удаление записи</a></li>
+</ul>
+</li>
+<li><a href="#авторизация">Авторизация</a></li>
+</ul>
+
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <h1 id="требования">Требования</h1>
+<p>Для прочтения этого материала необходимо:</p>
+<ul>
+<li>уметь самому запустить open server и создать проект</li>
+<li>выбрать необходимые для работы модули в настройках open server</li>
+<li>знать <strong>основы</strong> php и sql</li>
+<li>уметь работать в субд phpmyadmin или любой другой субд для mysql</li>
+<li>знать основы html, в том числе и создание форм</li>
+</ul>
+<p>Рекомендуемые мной ресурсы для изучения этих тем:</p>
+<ul>
+<li><a href="https://php.zone/kurs-php-dlya-nachinayushih/ustanovka-i-nastroyka-openserver">https://php.zone/kurs-php-dlya-nachinayushih/ustanovka-i-nastroyka-openserver</a> - установка open server, настройка модулей, создание проекта и hello world</li>
+<li><a href="https://www.w3schools.com/php/">https://www.w3schools.com/php/</a> - основы php</li>
+<li><a href="https://www.w3schools.com/sql/">https://www.w3schools.com/sql/</a> - основы sql</li>
+<li><a href="https://www.w3schools.com/html/html_forms.asp">https://www.w3schools.com/html/html_forms.asp</a> и <a href="https://www.w3schools.com/html/html_forms_attributes.asp">https://www.w3schools.com/html/html_forms_attributes.asp</a> для создания html форм</li>
+</ul>
+<p><strong>W3Schools достаточно использовать как справочник, для поиска того что нужно прямо сейчас, читать все не нужно</strong></p>
+<p><strong>Также у W3Schools есть <a href="https://www.schoolsw3.com/index.html">сайт с переводом</a></strong>. Информация там не самая новая, но, наверное, некоторым будет полезно</p>
+<blockquote>
+<p>Купить Open Server можно <a href="https://rutracker.org/forum/viewtopic.php?t=6250329">тут</a>, у меня все работает</p>
+</blockquote>
+<h2 id="про-формы">Про формы</h2>
+<p>Думаю, вы умеете делать простые формы, но хотелось бы отметить пару моментов.</p>
+<ul>
+<li>Важно указать атрибут <code>name</code> для полей, лучше всего будет указывать название соответствующего поля из таблицы бд.</li>
+<li>для тэга <code>form</code> нужно обязательно указать атрибут <code>method</code> со значением <code>"post"</code></li>
+<li>для тэга <code>form</code> нужно указать атрибут <code>action</code>, где в качестве значения используется путь до файла для обработки этой формы</li>
+<li>будет отлично добавить простую валидацию при помощи атрибута <code>required</code> для полей, обязательных к заполнению <a href="https://www.w3schools.com/html/html_form_attributes.asp">подробнее</a></li>
+<li>можно передавать в запрос свое значение, которое пользователь не должен изменить. Для этого используется <code>&lt;input type="hidden"/&gt;</code></li>
+</ul>
+<p><code>form.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>add_record.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field1<span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>textarea</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field2<span class="token punctuation">"</span></span> <span class="token attr-name">required</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>textarea</span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field3<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$variable</span> <span class="token delimiter important">?&gt;</span></span>/</span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Создать<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+
+</code></pre>
+<p>При отправке формы пользователем, отправляется <code>POST</code> запрос, обрабатываемый файлом, указанным в атрибуте <code>action</code>. Для доступа к полям, хранящимся в теле запроса в php используется ассоциативный массив <code>$_POST</code>.</p>
+<blockquote>
+<p>Обратите внимание, что имена ключей ассоциативного массива <code>$_POST</code> соответствуют атрибутам <code>name</code> у элементов формы.</p>
+</blockquote>
+<h1 id="работа-с-бд">Работа с бд</h1>
+<p><a href="https://phpfaq.ru/pdo">Хорошая статья</a> для того чтобы дополнительно разобраться с pdo</p>
+<p>Во-первых нужно создать базу данных в phpmyadmin. Выберите имя для бд и кодировку <code>utf8mb4_general_ci</code>. Также нужно будет импортировать дамп бд в панели импорт.</p>
+<h2 id="подключение-к-бд">Подключение к бд</h2>
+<p>Создайте файл connection.php, который нужно будет импортировать при помощи <code>require</code> туда, где будет нужно подключение к базе данных.</p>
+<p><code>connection.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token variable">$host</span> <span class="token operator">=</span> <span class="token string">"localhost"</span><span class="token punctuation">;</span>
+<span class="token variable">$db</span> <span class="token operator">=</span> <span class="token string">"dbname"</span><span class="token punctuation">;</span> <span class="token comment">// название базы данных</span>
+<span class="token variable">$username</span> <span class="token operator">=</span> <span class="token string">"root"</span><span class="token punctuation">;</span> <span class="token comment">// пользователь бд</span>
+<span class="token variable">$password</span> <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span> <span class="token comment">// пароль пользователя</span>
+  
+<span class="token variable">$pdo</span> <span class="token operator">=</span> <span class="token keyword">new</span>  <span class="token class-name">PDO</span><span class="token punctuation">(</span><span class="token string">"mysql:host=$host;dbname=$db"</span><span class="token punctuation">,</span> <span class="token variable">$username</span><span class="token punctuation">,</span> <span class="token variable">$password</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token constant">PDO</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token constant">ATTR_ERRMODE</span><span class="token punctuation">,</span> <span class="token constant">PDO</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token constant">ERRMODE_EXCEPTION</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</span></code></pre>
+<p>В этом коде объявляется переменная <code>$pdo</code> в которой хранится “экземпляр PDO” (подключение к бд), которая будет активно использоваться дальше. Также устанавливается атрибут <code>ATTR_ERRMODE</code> для того чтобы выбрасывались ошибки, которые можно обработать при помощи конструкции try catch.</p>
+<h2 id="запросы-к-бд">Запросы к бд</h2>
+<p>Тут есть два варианта: простой запрос и подготовленный запрос с последующей передачей параметров. Второй вариант нужно использовать только когда необходимо передать в запрос любую переменную, в остальных случаях достаточно первого способа. <strong>Обратите внимание, что в обоих случаях нужно указать название таблицы вместо <code>table</code></strong></p>
+<h3 id="простой-запрос">Простой запрос</h3>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./connection.php'</span><span class="token punctuation">;</span>
+<span class="token variable">$stmt</span> <span class="token operator">=</span> <span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token string">'SELECT  *  FROM table'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</span></code></pre>
+<p>Здесь импортируется файл connection.php для того чтобы иметь доступ к переменной <code>$pdo</code>, объявленной в нем. Выполняется <code>SELECT</code> sql запрос при помощи метода <code>query</code> объекта <code>$pdo</code>.</p>
+<h3 id="выполнение-подготовленного-запроса-с-последующей-передачей-параметров">Выполнение подготовленного запроса с последующей передачей параметров</h3>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./connection.php'</span><span class="token punctuation">;</span>
+<span class="token variable">$stmt</span> <span class="token operator">=</span> <span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">prepare</span><span class="token punctuation">(</span><span class="token string">'SELECT  *  FROM table WHERE id = ?'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token variable">$id</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</span></code></pre>
+<p>Здесь импортируется файл connection.php для того чтобы иметь доступ к переменной <code>$pdo</code>, объявленной в нем. Выполняется метод <code>prepare</code>, который создает подготовленный запрос, тут в sql нужно указать символ <code>?</code> для того чтобы потом подставить туда переменную. Вызвав метод <code>execute</code> у подготовленного запроса, можно передать параметры в виде массива</p>
+<h2 id="вывод-данных-из-бд">Вывод данных из бд</h2>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./connection.php'</span><span class="token punctuation">;</span>
+<span class="token variable">$stmt</span> <span class="token operator">=</span> <span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token string">'SELECT  *  FROM table'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span>
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ul</span><span class="token punctuation">&gt;</span></span>
+<span class="token php language-php"><span class="token delimiter important">&lt;?php</span> <span class="token keyword">foreach</span> <span class="token punctuation">(</span><span class="token variable">$stmt</span> <span class="token keyword">as</span> <span class="token variable">$row</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token delimiter important">?&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>b</span><span class="token punctuation">&gt;</span></span><span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$row</span><span class="token punctuation">[</span><span class="token string">'property1'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>b</span><span class="token punctuation">&gt;</span></span>: <span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$row</span><span class="token punctuation">[</span><span class="token string">'property2'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">&gt;</span></span>
+<span class="token php language-php"><span class="token delimiter important">&lt;?php</span> <span class="token punctuation">}</span> <span class="token delimiter important">?&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ul</span><span class="token punctuation">&gt;</span></span>
+
+</code></pre>
+<p>Здесь выполняется простой запрос. Данные выводятся в виде списка при помощи конструкции <code>foreach</code>, обратите внимание, что переменная <code>$row</code> это ассоциативный массив, где ключами являются названия полей в таблице.</p>
+<h2 id="добавление-записи-в-бд">Добавление записи в бд</h2>
+<p>Для начала нужно создать простую html форму.</p>
+<p><code>form.html</code></p>
+<pre class=" language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>add_record.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field1<span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>textarea</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field2<span class="token punctuation">"</span></span> <span class="token attr-name">required</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>textarea</span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Создать<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+
+</code></pre>
+<p>Теперь нужно создать файл для обработки формы. После импорта файла с подключением, для удобства можно создать отдельные переменные для ключей <code>$_POST</code>. Остается только выполнить подготовленный запрос.</p>
+<p><code>add_record.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span> <span class="token string">'./connection.php'</span><span class="token punctuation">;</span> <span class="token comment">// импортировать файл с подключением</span>
+
+<span class="token variable">$field1</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'field1'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token variable">$field2</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'field1'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">prepare</span><span class="token punctuation">(</span><span class="token string">"INSERT INTO table (field1, field1) values (?, ?)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token variable">$title</span><span class="token punctuation">,</span> <span class="token variable">$content</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</span></code></pre>
+<h2 id="редактирование-записи">Редактирование записи</h2>
+<p>Все точно также как и при создании записи, меняется только sql запрос. Тут можно использовать скрытое поле для передачи поля для идентификации. Также стоит указывать значение по умолчанию для полей при помощи атрибута <code>value</code></p>
+<p><code>form.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>edit_record.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field1<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$record</span><span class="token punctuation">[</span><span class="token string">'field1'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span><span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field2<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$record</span><span class="token punctuation">[</span><span class="token string">'field2'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span><span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field3<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$record</span><span class="token punctuation">[</span><span class="token string">'field3'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span><span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Изменить<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+
+</code></pre>
+<p><code>edit_record.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span> <span class="token string">'./connection.php'</span><span class="token punctuation">;</span> <span class="token comment">// импортировать файл с подключением</span>
+
+<span class="token variable">$field1</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'field1'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token variable">$field2</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'field2'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token variable">$field3</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'field3 '</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">prepare</span><span class="token punctuation">(</span><span class="token string">"UPDATE table SET field1 = ?, field2 = ? WHERE field3 = ?"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token variable">$field1</span><span class="token punctuation">,</span> <span class="token variable">$field2</span><span class="token punctuation">,</span> <span class="token variable">$field3</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</span></code></pre>
+<h2 id="удаление-записи">Удаление записи</h2>
+<p>Все точно также как и при создании записи, меняется только sql запрос. Тут можно использовать скрытое поле для передачи поля для идентификации.</p>
+<p><code>post.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>delete_record.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>field1<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span><span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$record</span><span class="token punctuation">[</span><span class="token string">'field1'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span><span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Удалить<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+
+</code></pre>
+<p><code>delete_record.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span> <span class="token string">'./connection.php'</span><span class="token punctuation">;</span> <span class="token comment">// импортировать файл с подключением</span>
+
+<span class="token variable">$field1</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'field1'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">prepare</span><span class="token punctuation">(</span><span class="token string">"DELETE FROM posts WHERE field1 = ?"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token variable">$field1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</span></code></pre>
+<h1 id="авторизация">Авторизация</h1>
+<p><a href="https://habr.com/ru/articles/665602/">хорошая статься про авторизацию на php</a>, все что я бы написал дальше было бы взято из нее. Так же там приведен простой способ обработки ошибок при помощи функции <code>flash()</code></p>
+
+    </div>
+  </div>
+</body>
+
+</html>
