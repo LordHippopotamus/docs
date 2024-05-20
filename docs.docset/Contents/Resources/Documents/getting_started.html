@@ -28,7 +28,16 @@
 <li><a href="#удаление-записи">Удаление записи</a></li>
 </ul>
 </li>
-<li><a href="#авторизация">Авторизация</a></li>
+<li><a href="#авторизация">Авторизация</a>
+<ul>
+<li><a href="#регистрация">Регистрация</a></li>
+<li><a href="#вход">Вход</a></li>
+<li><a href="#выход">Выход</a></li>
+<li><a href="#получение-пользователя">Получение пользователя</a></li>
+<li><a href="#роли-пользователей">Роли пользователей</a></li>
+</ul>
+</li>
+<li><a href="#обработка-ошибок">Обработка ошибок</a></li>
 </ul>
 
     </div>
@@ -56,6 +65,7 @@
 <blockquote>
 <p>Купить Open Server можно <a href="https://rutracker.org/forum/viewtopic.php?t=6250329">тут</a>, у меня все работает</p>
 </blockquote>
+<p><strong>При копирование кода отсюда, внимательно проверяйте правильность путей для ссылок, перенаправлений и подключаемых файлов</strong></p>
 <h2 id="про-формы">Про формы</h2>
 <p>Думаю, вы умеете делать простые формы, но хотелось бы отметить пару моментов.</p>
 <ul>
@@ -92,7 +102,6 @@
   
 <span class="token variable">$pdo</span> <span class="token operator">=</span> <span class="token keyword">new</span>  <span class="token class-name">PDO</span><span class="token punctuation">(</span><span class="token string">"mysql:host=$host;dbname=$db"</span><span class="token punctuation">,</span> <span class="token variable">$username</span><span class="token punctuation">,</span> <span class="token variable">$password</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token constant">PDO</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token constant">ATTR_ERRMODE</span><span class="token punctuation">,</span> <span class="token constant">PDO</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token constant">ERRMODE_EXCEPTION</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
 </span></code></pre>
 <p>В этом коде объявляется переменная <code>$pdo</code> в которой хранится “экземпляр PDO” (подключение к бд), которая будет активно использоваться дальше. Также устанавливается атрибут <code>ATTR_ERRMODE</code> для того чтобы выбрасывались ошибки, которые можно обработать при помощи конструкции try catch.</p>
 <h2 id="запросы-к-бд">Запросы к бд</h2>
@@ -191,7 +200,195 @@
 
 </span></code></pre>
 <h1 id="авторизация">Авторизация</h1>
-<p><a href="https://habr.com/ru/articles/665602/">хорошая статься про авторизацию на php</a>, все что я бы написал дальше было бы взято из нее. Так же там приведен простой способ обработки ошибок при помощи функции <code>flash()</code></p>
+<p><a href="https://habr.com/ru/articles/665602/">хорошая статься про авторизацию на php</a>, все что написано дальше было бы взято из нее. Так же там приведен простой способ обработки ошибок при помощи функции <code>flash()</code></p>
+<p>Самый просто способ сделать авторизацию - это хранить id пользователя (или все данные о пользователе) в сессии. Для этого в php используется <code>$_SESSION</code>.</p>
+<p><strong>Предварительно нужно инициализировать сессию при помощи <code>session_start()</code>.</strong> Эту функцию можно вызвать в файле, который везде подключается, например в <code>connection.php</code> (дальше он называется <code>boot.php</code>).</p>
+<p><code>boot.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token variable">$host</span> <span class="token operator">=</span> <span class="token string">"localhost"</span><span class="token punctuation">;</span>
+<span class="token variable">$db</span> <span class="token operator">=</span> <span class="token string">"dbname"</span><span class="token punctuation">;</span> <span class="token comment">// название базы данных</span>
+<span class="token variable">$username</span> <span class="token operator">=</span> <span class="token string">"root"</span><span class="token punctuation">;</span> <span class="token comment">// пользователь бд</span>
+<span class="token variable">$password</span> <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span> <span class="token comment">// пароль пользователя</span>
+  
+<span class="token variable">$pdo</span> <span class="token operator">=</span> <span class="token keyword">new</span>  <span class="token class-name">PDO</span><span class="token punctuation">(</span><span class="token string">"mysql:host=$host;dbname=$db"</span><span class="token punctuation">,</span> <span class="token variable">$username</span><span class="token punctuation">,</span> <span class="token variable">$password</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token constant">PDO</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token constant">ATTR_ERRMODE</span><span class="token punctuation">,</span> <span class="token constant">PDO</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token constant">ERRMODE_EXCEPTION</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</span></code></pre>
+<h2 id="регистрация">Регистрация</h2>
+<p><code>registration.html</code></p>
+<pre class=" language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POST<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>register.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>login<span class="token punctuation">"</span></span> <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Логин<span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Пароль<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Зарегистрироваться<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+<p>После импорта файла <code>boot.php</code>,  для удобства можно создать отдельные переменные для ключей <code>$_POST</code>.</p>
+<p>Обратите внимание что пароль хэшируется при помощи функции <code>password_hash()</code></p>
+<p>Дальше выполняется подготовленный запрос. Если все получилось, то пользователь перенаправляется на страницу входа, иначе ему показывается ошибка.</p>
+<p><code>register.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./boot.php'</span><span class="token punctuation">;</span>
+
+<span class="token variable">$login</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token variable">$password</span> <span class="token operator">=</span> <span class="token function">password_hash</span><span class="token punctuation">(</span><span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'password'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token constant">PASSWORD_DEFAULT</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">try</span> <span class="token punctuation">{</span>
+	<span class="token variable">$stmt</span> <span class="token operator">=</span> <span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">prepare</span><span class="token punctuation">(</span><span class="token string">'INSERT INTO users (login, password) values (?, ?)'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token variable">$success</span> <span class="token operator">=</span> <span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token variable">$login</span><span class="token punctuation">,</span> <span class="token variable">$password</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+	<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$success</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /login.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		exit<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">PDOException</span>  <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">echo</span> <span class="token variable">$e</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</span></code></pre>
+<h2 id="вход">Вход</h2>
+<p><code>login.html</code></p>
+<pre class=" language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POST<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>do_login.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>login<span class="token punctuation">"</span></span> <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Логин<span class="token punctuation">"</span></span>  <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Пароль<span class="token punctuation">"</span></span>  <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Войти<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+<p><code>do_login.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./boot.php'</span><span class="token punctuation">;</span>
+
+<span class="token variable">$login</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token variable">$password</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'password'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token keyword">try</span> <span class="token punctuation">{</span>
+	<span class="token variable">$stmt</span> <span class="token operator">=</span> <span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">prepare</span><span class="token punctuation">(</span><span class="token string">'SELECT  *  FROM users WHERE  login  = ?'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token variable">$login</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token variable">$user</span> <span class="token operator">=</span> <span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">fetch</span><span class="token punctuation">(</span><span class="token constant">PDO</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token constant">FETCH_ASSOC</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token variable">$user</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">throw</span>  <span class="token keyword">new</span>  <span class="token class-name">Exception</span><span class="token punctuation">(</span><span class="token string">'Пользователя с таким логином не существует'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">password_verify</span><span class="token punctuation">(</span><span class="token variable">$password</span><span class="token punctuation">,</span> <span class="token variable">$user</span><span class="token punctuation">[</span><span class="token string">'password'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			<span class="token keyword">throw</span>  <span class="token keyword">new</span>  <span class="token class-name">Exception</span><span class="token punctuation">(</span><span class="token string">'Неверный пароль'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+			<span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'user'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token variable">$user</span><span class="token punctuation">;</span>
+			<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			exit<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span>  <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">echo</span> <span class="token variable">$e</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</span></code></pre>
+<p>После импорта файла <code>boot.php</code>,  для удобства можно создать отдельные переменные для ключей <code>$_POST</code>.</p>
+<p>Дальше нужно получить пользователя по указанному логину, если такого пользователя нет, нужно бросить ошибку.</p>
+<p>Если пользователь существует, тогда нужно сверить пароли, делается это при помощи функции <code>password_verify()</code>. Если пароль неверный, тогда тоже выбрасывается ошибка, иначе пользователь добавляется в сессию и теперь считается авторизованным.</p>
+<p>В конце происходит перенаправление на главную страницу.</p>
+<h2 id="выход">Выход</h2>
+<p>Для выхода достаточно обнулить значение <code>$_SESSION['user']</code>.</p>
+<p><code>logout.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./boot.php'</span><span class="token punctuation">;</span>
+<span class="token function">unset</span><span class="token punctuation">(</span><span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'user_id'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</span></code></pre>
+<p>Приведенный выше пример, можно использовать как в качестве <code>action</code> для формы, так и через ссылку</p>
+<pre class=" language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logout.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Выйти<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+
+<span class="token comment">&lt;!-- или --&gt;</span> 
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>logout.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>Выйти<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+<h2 id="получение-пользователя">Получение пользователя</h2>
+<p>Для того чтобы получить пользователя достаточно обратиться к <code>$_SESSION['user']</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./boot.php'</span><span class="token punctuation">;</span>
+
+<span class="token variable">$user</span> <span class="token operator">=</span> <span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'user'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token variable">$user</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /login.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	exit<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter important">?&gt;</span></span>
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">&gt;</span></span>Добро пожаловать, <span class="token php language-php"><span class="token delimiter important">&lt;?=</span> <span class="token variable">$user</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span>!<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+<p>В этом примере если пользователь не авторизован, то его перенаправляет на страницу входа, иначе отображается приветственное сообщение.</p>
+<h2 id="роли-пользователей">Роли пользователей</h2>
+<p>Для реализации системы ролей достаточно иметь поле <code>role</code> в таблице пользователей, со значением по умолчанию <code>user</code> для регистрации обычных пользователей.</p>
+<p>Для создания учетной записи администратора нужно зарегистрировать обычного пользователя, после чего в phpmyadmin  сменить значение поля <code>role</code> с <code>user</code> на  <code>admin</code>.</p>
+<p>В примере ниже если роль пользователя не <code>admin</code>, то его перенаправляет на главную страницу.</p>
+<p><code>admin.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./boot.php'</span><span class="token punctuation">;</span>
+
+<span class="token variable">$user</span> <span class="token operator">=</span> <span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'user'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token variable">$user</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /login.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	exit<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$user</span><span class="token punctuation">[</span><span class="token string">'role'</span><span class="token punctuation">]</span> <span class="token operator">!==</span> <span class="token string">'admin'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	exit<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</span></code></pre>
+<h1 id="обработка-ошибок">Обработка ошибок</h1>
+<p><code>flash.php</code></p>
+<pre class=" language-php"><code class="prism  language-php">function  flash(?string $message = null)
+{
+	if ($message) {
+		$_SESSION['flash'] = $message;
+	} else {
+		if (!empty($_SESSION['flash'])) { ?&gt;
+			<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">&gt;</span></span><span class="token php language-php"><span class="token delimiter important">&lt;?=</span>  <span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'flash'</span><span class="token punctuation">]</span> <span class="token delimiter important">?&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">&gt;</span></span>
+		<span class="token php language-php"><span class="token delimiter important">&lt;?php</span> <span class="token punctuation">}</span>
+		<span class="token function">unset</span><span class="token punctuation">(</span><span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'flash'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</span></code></pre>
+<p>Добавьте эту функцию в <code>boot.php</code>. Если нужно добавить ошибку вызовите <code>flash('your-error-message')</code>. Если вывести, то просто вызовите, не передавая аргументов <code>flash()</code> в том месте, где хотите ее отобразить. Разумеется, чтобы пользоваться этой функцией, сначала нужно импортировать <code>boot.php</code>.</p>
+<p>Обработка ошибок на примере регистрации.</p>
+<p><code>registration.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>POST<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>register.php<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>login<span class="token punctuation">"</span></span> <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Логин<span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">placeholder</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Пароль<span class="token punctuation">"</span></span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>password<span class="token punctuation">"</span></span> <span class="token attr-name">required</span> <span class="token punctuation">/&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">&gt;</span></span>Зарегистрироваться<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+
+// вывод ошибки, если она есть
+<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span> <span class="token string">'./boot.php'</span><span class="token punctuation">;</span>
+<span class="token function">flash</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token delimiter important">?&gt;</span></span> 
+</code></pre>
+<p><code>register.php</code></p>
+<pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">require</span>  <span class="token string">'./boot.php'</span><span class="token punctuation">;</span>
+
+<span class="token variable">$login</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token variable">$password</span> <span class="token operator">=</span> <span class="token function">password_hash</span><span class="token punctuation">(</span><span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'password'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token constant">PASSWORD_DEFAULT</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">try</span> <span class="token punctuation">{</span>
+	<span class="token variable">$stmt</span> <span class="token operator">=</span> <span class="token variable">$pdo</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">prepare</span><span class="token punctuation">(</span><span class="token string">'INSERT INTO users (login, password) values (?, ?)'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token variable">$success</span> <span class="token operator">=</span> <span class="token variable">$stmt</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token variable">$login</span><span class="token punctuation">,</span> <span class="token variable">$password</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+	<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$success</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /login.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		exit<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">PDOException</span>  <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token comment">// добавление ошибки, если она появилась</span>
+	<span class="token function">flash</span><span class="token punctuation">(</span><span class="token variable">$e</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	
+	<span class="token comment">// перенаправление на страницу регистрации чтобыот образить ошибку</span>
+	<span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: /registration.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	exit<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</span></code></pre>
 
     </div>
   </div>
