@@ -178,33 +178,43 @@
 <span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">require_once</span><span class="token punctuation">(</span><span class="token string">"db.php"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token variable">$login</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token variable">$pass</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string">'pass'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token variable">$login</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token function">empty</span><span class="token punctuation">(</span><span class="token variable">$pass</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-    <span class="token keyword">echo</span> <span class="token string">"Заполните все поля!"</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span class="token keyword">else</span><span class="token punctuation">{</span>
-    <span class="token variable">$sql</span> <span class="token operator">=</span> <span class="token string">"SELECT * FROM `users` WHERE login = '$login' AND pass = '$pass'"</span><span class="token punctuation">;</span>
-    <span class="token variable">$result</span> <span class="token operator">=</span> <span class="token variable">$conn</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token variable">$sql</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$result</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token property">num_rows</span> <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token variable">$row</span> <span class="token operator">=</span> <span class="token variable">$result</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">fetch_assoc</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token variable">$login</span> <span class="token operator">==</span><span class="token string">'admin'</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-                <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: admin.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
-            <span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token variable">$login</span><span class="token punctuation">;</span>
-            <span class="token keyword">echo</span> <span class="token string">"Добро пожаловать!"</span><span class="token punctuation">;</span>
-            <span class="token function">header</span><span class="token punctuation">(</span><span class="token string">'Location: office.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-            <span class="token punctuation">}</span>
+<span class="token keyword">function</span> <span class="token function">printResult</span><span class="token punctuation">(</span><span class="token variable">$result</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token variable">$result</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token property">num_rows</span> <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token comment">//print_r($result-&gt;fetch_all());</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token variable">$row</span> <span class="token operator">=</span> <span class="token variable">$result</span> <span class="token operator">-</span><span class="token operator">&gt;</span> <span class="token function">fetch_assoc</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+            <span class="token keyword">echo</span> <span class="token string">"Заголовок: "</span> <span class="token punctuation">.</span><span class="token variable">$row</span><span class="token punctuation">[</span><span class="token string">'title'</span><span class="token punctuation">]</span><span class="token punctuation">.</span> <span class="token string">'.'</span><span class="token punctuation">;</span>
+            <span class="token keyword">echo</span> <span class="token string">"Текст: "</span> <span class="token punctuation">.</span><span class="token variable">$row</span><span class="token punctuation">[</span><span class="token string">'content'</span><span class="token punctuation">]</span><span class="token punctuation">.</span> <span class="token string">'.'</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
-    <span class="token keyword">else</span><span class="token punctuation">{</span>
-        <span class="token keyword">echo</span> <span class="token string">"Нет такого пользователя!"</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    <span class="token keyword">echo</span> <span class="token string">"&lt;hr&gt;"</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
-</span></code></pre>
+<span class="token variable">$mysql</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">mysqli</span><span class="token punctuation">(</span><span class="token string">"localhost"</span><span class="token punctuation">,</span> <span class="token string">"root"</span><span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">,</span> <span class="token string">"registerUsers"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$result</span> <span class="token operator">=</span>  <span class="token variable">$mysql</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token string">"SELECT * FROM users"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token delimiter important">?&gt;</span></span>
+<span class="token doctype">&lt;!DOCTYPE html&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span> <span class="token attr-name">lang</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>en<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>UTF-8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>viewport<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>width=device-width, initial-scale=1.0<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">&gt;</span></span>Личный кабинет<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h3</span><span class="token punctuation">&gt;</span></span><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isset</span><span class="token punctuation">(</span><span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">echo</span> <span class="token string">'Добро пожаловать, '</span> <span class="token punctuation">.</span><span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string">'login'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token variable">$result</span> <span class="token operator">=</span>  <span class="token variable">$mysql</span><span class="token operator">-</span><span class="token operator">&gt;</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token string">"SELECT * FROM posts"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">printResult</span><span class="token punctuation">(</span><span class="token variable">$result</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token delimiter important">?&gt;</span></span>
+
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h3</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
 <h1 id="регистрация-усл">Регистрация усл</h1>
 <pre class=" language-php"><code class="prism  language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token keyword">require_once</span><span class="token punctuation">(</span><span class="token string">"db.php"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -257,7 +267,6 @@
 <span class="token punctuation">}</span>
 </span></code></pre>
 
-<a href="form-sh.zip">form-sh.zip</a>
     </div>
   </div>
 </body>
