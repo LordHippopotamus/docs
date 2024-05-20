@@ -5,7 +5,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>dashing</string>
 	<key>CFBundleName</key>
-	<string>Dashing</string>
+	<string>api PHP</string>
 	<key>DocSetPlatformFamily</key>
 	<string>dashing</string>
 	<key>isDashDocset</key>
